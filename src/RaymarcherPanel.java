@@ -74,7 +74,8 @@ public class RaymarcherPanel extends JPanel {
     @Override
     public void paintComponent(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
-
+        double minDistance = computeMinDistance();
+        camera.setRadius((int) minDistance*2);
         g2d.setColor(Color.BLUE);
         camera.DrawCamera(g2d);
 
@@ -94,29 +95,50 @@ public class RaymarcherPanel extends JPanel {
             }
         }
 //        g2d.fillRect(0, 0, this.getWidth(),this.getHeight());
-    }
-    private double computeMinDistance() {
-        double minDistance = Double.MAX_VALUE;
-        int[] cameraPosition = camera.getPosition();
 
+    }
+
+//    public static boolean isInsideRectangle(double rx, double ry, double w, double h, double px, double py) {
+//        double halfWidth = w / 2.0;
+//        double halfHeight = h / 2.0;
+//
+//
+//        double left = rx - halfWidth;
+//        double right = rx + halfWidth;
+//        double top = ry + halfHeight;
+//        double bottom = ry - halfHeight;
+//
+//
+//        if (px > left && px < right && py > bottom && py < top) {
+//
+//            return true;
+//        } else {
+//
+//            return false;
+//        }
+//    }
+    private double computeMinDistance() {
+        int[] cPos = camera.getPosition();
+        double min = Double.MAX_VALUE;
         for(CollisionObject object: CollisionObjects){
-            double distance = 0;
             if(object instanceof RectangleObject){
                 RectangleObject rect = (RectangleObject) object;
-                // calculate distance to the center of rectangle
-                distance = Math.sqrt(Math.pow(cameraPosition[0] - (rect.GetX() + rect.getWidth()/2), 2) +
-                        Math.pow(cameraPosition[1] - (rect.GetY() + rect.getHeight()/2), 2));
-            } else {
-                CircleObject circ = (CircleObject) object;
-                // calculate distance to the center of circle
-                distance = Math.sqrt(Math.pow(cameraPosition[0] - circ.GetX(), 2) +
-                        Math.pow(cameraPosition[1] - circ.GetY(), 2));
-            }
+                double hw = rect.getWidth()/2, hh = rect.getHeight()/2;
+                double xLeft = rect.GetX()-hw, xRight = rect.GetX()+hw;
+                double yTop = rect.GetY()+hh, yBottom = rect.GetY()-hh;
 
-            if(distance < minDistance) {
-                minDistance = distance;
+                double dx = Math.max(Math.max(xLeft - cPos[0], cPos[0] - xRight), 0);
+                double dy = Math.max(Math.max(yBottom - cPos[1], cPos[1] - yTop), 0);
+
+                double distance = Math.sqrt(dx * dx + dy * dy);
+                min = Math.min(min, distance);
+
+
+            }else{
+
+                CircleObject circ = (CircleObject) object;
             }
         }
-        return minDistance;
+        return min;
     }
 }
