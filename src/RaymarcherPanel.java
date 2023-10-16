@@ -16,7 +16,7 @@ import javax.swing.JPanel;
 /**
  * Displays and updates the logic for the top-down raymarcher.
  */
-public class RaymarcherPanel extends JPanel implements MouseMotionListener {
+public class RaymarcherPanel extends JPanel implements MouseMotionListener{
     private Camera camera;
     
     /**
@@ -33,12 +33,14 @@ public class RaymarcherPanel extends JPanel implements MouseMotionListener {
 
         this.CollisionObjects = new ArrayList<>();
         populate(20);
-        camera = new Camera(10);
+        camera = new Camera(1);
         addMouseMotionListener(camera);
         addMouseMotionListener(this);
     }
 
     public void populate(int n){
+
+
         for(int i = 0;i <= n; i++){
             int SOR = (int)(Math.random()*10);
             if(SOR%2==0){
@@ -52,8 +54,8 @@ public class RaymarcherPanel extends JPanel implements MouseMotionListener {
     }
     public RectangleObject generateRect(){
         int x,y,w,h;
-        w = (int)(Math.random()*200);
-        h = (int)(Math.random()*200);
+        w = (int)(Math.random()*200)+10;
+        h = (int)(Math.random()*200)+10;
         x = (int)(Math.random()*(1280 - w));
         y = (int)(Math.random()*(640 - h));
 
@@ -64,7 +66,7 @@ public class RaymarcherPanel extends JPanel implements MouseMotionListener {
     }
     public CircleObject generateCircle() {
         int x,y,r;
-        r = (int)(Math.random()*200);
+        r = (int)(Math.random()*200)+10;
         x = r + (int)(Math.random()*(1280-2*r));
         y = r + (int)(Math.random()*(640-2*r));
         CircleObject circ = new CircleObject(r, x, y);
@@ -79,22 +81,11 @@ public class RaymarcherPanel extends JPanel implements MouseMotionListener {
         g2d.setColor(Color.BLUE);
         camera.DrawCamera(g2d);
 
-        for(CollisionObject object: CollisionObjects){
-
-            if(object instanceof RectangleObject){
-                RectangleObject rect = (RectangleObject) object;
-                g2d.setColor(rect.getColor());
-                g2d.fillRect(rect.GetX(),rect.GetY(),rect.getWidth(),rect.getHeight());
-
-            }else{
-
-                CircleObject circ = (CircleObject) object;
-                g2d.setColor(circ.getColor());
-                g2d.fillOval(circ.GetX(),circ.GetY(),circ.getRadius(),circ.getRadius());
-
-            }
+        //forEach Loop that loops through the list and paints it.
+        for(CollisionObject x: CollisionObjects){
+            x.drawable((Graphics2D) g);
         }
-//        g2d.fillRect(0, 0, this.getWidth(),this.getHeight());
+
 
     }
 
@@ -105,30 +96,15 @@ public class RaymarcherPanel extends JPanel implements MouseMotionListener {
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        double minDist = computeDistanceToObjects(camera.getPosition()[0]-5, camera.getPosition()[1]-5);
-        camera.setRadius((int) minDist);
+        double minDist = computeDistanceToObjects(camera.getPosition()[0], camera.getPosition()[1]);
+        camera.setRadius((int) minDist*2);
 
     }
-
     public double computeDistanceToObjects(double cameraX, double cameraY){
         double minDist = Double.MAX_VALUE;
-        for(CollisionObject object: CollisionObjects){
-
-            if(object instanceof RectangleObject){
-                RectangleObject rect = (RectangleObject) object;
-                double dist = rect.computeDistance(cameraX,cameraY);
-                minDist = Math.min(dist,minDist);
-
-            }else{
-                CircleObject circ = (CircleObject) object;
-                double dist = circ.computeDistance(cameraX,cameraY);
-                minDist = Math.min(dist,minDist);
-            }
+        for(CollisionObject object: CollisionObjects) {
+            minDist = Math.min(object.computeDistance(cameraX, cameraY), minDist);
         }
-
-
-
-
         return minDist;
     }
 }

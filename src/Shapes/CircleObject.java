@@ -11,15 +11,17 @@ public class CircleObject extends CollisionObject {
 
     private int d;
     private Color color;
-    private int x,y;
+    private int x,y,cX,cY;
 
 
-    public CircleObject(int radius,int x, int y){
+    public CircleObject(int d,int x, int y){
         super(x,y);
-        this.r = radius;
-        this.d = r * 2;
-        this.x = x;
-        this.y = y;
+        this.r = d/2;
+        this.d = d;
+        this.x = x - r;
+        this.y = y - r;
+        this.cX = x;
+        this.cY = y;
         this.color = new Color((int)(Math.random()*255),(int)(Math.random()*255),(int)(Math.random()*255));
     }
 
@@ -42,8 +44,17 @@ public class CircleObject extends CollisionObject {
     public double computeDistance(double cameraX, double cameraY) {
         double distance;
 
-        distance = Math.sqrt(Math.pow((cameraX - x),2) + Math.pow((cameraY - y),2)) - r;
+        distance = Math.sqrt(Math.pow((cameraX - cX),2) + Math.pow((cameraY - cY),2)) - r;
 
         return distance;
+    }
+    @Override
+    public void drawable(Graphics2D g2d) {
+        g2d.setColor(color);
+        g2d.fillOval(x ,y,d,d);
+
+
+        g2d.setColor(Color.BLACK);
+        g2d.fillOval(cX,cY,4,4);
     }
 }
