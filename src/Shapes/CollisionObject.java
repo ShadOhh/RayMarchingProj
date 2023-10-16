@@ -2,6 +2,8 @@ package Shapes;
 
 public abstract class CollisionObject {
     private int[] xy = new int[]{0,0};
+    abstract double computeDistance(double cameraX, double cameraY);
+
 
 
     public CollisionObject(int x, int y){

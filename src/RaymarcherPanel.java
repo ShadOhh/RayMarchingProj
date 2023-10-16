@@ -7,6 +7,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 
 import javax.swing.JPanel;
@@ -14,7 +16,7 @@ import javax.swing.JPanel;
 /**
  * Displays and updates the logic for the top-down raymarcher.
  */
-public class RaymarcherPanel extends JPanel {
+public class RaymarcherPanel extends JPanel implements MouseMotionListener {
     private Camera camera;
     
     /**
@@ -38,7 +40,6 @@ public class RaymarcherPanel extends JPanel {
     public void populate(int n){
         for(int i = 0;i <= n; i++){
             int SOR = (int)(Math.random()*10);
-
             if(SOR%2==0){
                 CollisionObjects.add(generateRect());
             }else{
@@ -74,8 +75,6 @@ public class RaymarcherPanel extends JPanel {
     @Override
     public void paintComponent(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
-        double minDistance = computeMinDistance();
-        camera.setRadius((int) minDistance*2);
         g2d.setColor(Color.BLUE);
         camera.DrawCamera(g2d);
 
@@ -98,47 +97,37 @@ public class RaymarcherPanel extends JPanel {
 
     }
 
-//    public static boolean isInsideRectangle(double rx, double ry, double w, double h, double px, double py) {
-//        double halfWidth = w / 2.0;
-//        double halfHeight = h / 2.0;
-//
-//
-//        double left = rx - halfWidth;
-//        double right = rx + halfWidth;
-//        double top = ry + halfHeight;
-//        double bottom = ry - halfHeight;
-//
-//
-//        if (px > left && px < right && py > bottom && py < top) {
-//
-//            return true;
-//        } else {
-//
-//            return false;
-//        }
-//    }
-    private double computeMinDistance() {
-        int[] cPos = camera.getPosition();
-        double min = Double.MAX_VALUE;
+    @Override
+    public void mouseDragged(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        double minDist = computeDistanceToObjects(camera.getPosition()[0]-5, camera.getPosition()[1]-5);
+        camera.setRadius((int) minDist);
+
+    }
+
+    public double computeDistanceToObjects(double cameraX, double cameraY){
+        double minDist = Double.MAX_VALUE;
         for(CollisionObject object: CollisionObjects){
+
             if(object instanceof RectangleObject){
                 RectangleObject rect = (RectangleObject) object;
-                double hw = rect.getWidth()/2, hh = rect.getHeight()/2;
-                double xLeft = rect.GetX()-hw, xRight = rect.GetX()+hw;
-                double yTop = rect.GetY()+hh, yBottom = rect.GetY()-hh;
-
-                double dx = Math.max(Math.max(xLeft - cPos[0], cPos[0] - xRight), 0);
-                double dy = Math.max(Math.max(yBottom - cPos[1], cPos[1] - yTop), 0);
-
-                double distance = Math.sqrt(dx * dx + dy * dy);
-                min = Math.min(min, distance);
-
+                double dist = rect.computeDistance(cameraX,cameraY);
+                minDist = Math.min(dist,minDist);
 
             }else{
-
                 CircleObject circ = (CircleObject) object;
+                double dist = circ.computeDistance(cameraX,cameraY);
+                minDist = Math.min(dist,minDist);
             }
         }
-        return min;
+
+
+
+
+        return minDist;
     }
 }
