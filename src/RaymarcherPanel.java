@@ -35,6 +35,7 @@ public class RaymarcherPanel extends JPanel implements MouseMotionListener {
         populate(20);
         camera = new Camera(10);
         addMouseMotionListener(camera);
+        addMouseMotionListener(this);
     }
 
     public void populate(int n){
